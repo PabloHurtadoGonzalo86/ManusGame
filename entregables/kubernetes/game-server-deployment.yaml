@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-server
+  namespace: la-hucha-de-paredes
+  labels:
+    app: game-server
+    component: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: game-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: game-server
+        component: backend
+    spec:
+      containers:
+      - name: game-server
+        image: ${REGISTRY}/la-hucha-de-paredes/game-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: websocket
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 20
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: game-config
+              key: redis_host
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: game-config
+              key: redis_port
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: game-secrets
+              key: mongodb_uri
+      imagePullSecrets:
+      - name: registry-credentials

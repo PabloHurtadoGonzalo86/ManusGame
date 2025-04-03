@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: la-hucha-de-paredes
+  labels:
+    name: la-hucha-de-paredes
+    environment: production

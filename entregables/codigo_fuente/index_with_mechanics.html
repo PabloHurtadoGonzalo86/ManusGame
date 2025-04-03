@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Hucha de Paredes - Prototipo</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            z-index: 100;
+            pointer-events: none;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            transform: translateY(-50%);
+            z-index: 200;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Cargando...</div>
+    <div id="info">La Hucha de Paredes - Prototipo con Mecánicas de Juego</div>
+    
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+        
+        // Variables globales
+        let scene, camera, renderer, controls;
+        let floor, walls = [], lights = [];
+        let clock = new THREE.Clock();
+        let gameManager;
+        
+        // Inicialización
+        init();
+        animate();
+        
+        function init() {
+            // Crear escena
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.Fog(0x000000, 10, 50);
+            
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            
+            // Crear renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+            
+            // Controles de órbita para la cámara (solo para vista inicial)
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            controls.update();
+            
+            // Crear luces
+            createLights();
+            
+            // Crear entorno
+            createEnvironment();
+            
+            // Cargar script de mecánicas de juego
+            loadGameMechanics();
+            
+            // Evento de redimensionamiento
+            window.addEventListener('resize', onWindowResize);
+            
+            // Ocultar pantalla de carga
+            document.getElementById('loading').classList.add('hidden');
+        }
+        
+        function createLights() {
+            // Luz ambiental
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+            lights.push(ambientLight);
+            
+            // Luz principal
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+            mainLight.position.set(5, 10, 7.5);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 50;
+            mainLight.shadow.camera.left = -15;
+            mainLight.shadow.camera.right = 15;
+            mainLight.shadow.camera.top = 15;
+            mainLight.shadow.camera.bottom = -15;
+            scene.add(mainLight);
+            lights.push(mainLight);
+            
+            // Luces de relleno
+            const fillLight1 = new THREE.PointLight(0xff9000, 0.7, 20);
+            fillLight1.position.set(-5, 2, 5);
+            fillLight1.castShadow = true;
+            scene.add(fillLight1);
+            lights.push(fillLight1);
+            
+            const fillLight2 = new THREE.PointLight(0x0060ff, 0.7, 20);
+            fillLight2.position.set(5, 2, 5);
+            fillLight2.castShadow = true;
+            scene.add(fillLight2);
+            lights.push(fillLight2);
+        }
+        
+        function createEnvironment() {
+            // Crear suelo
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x444444, 
+                roughness: 0.7,
+                metalness: 0.1
+            });
+            floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            
+            // Crear paredes (estilo manicomio)
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xaaaaaa, 
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            
+            // Pared trasera
+            const backWallGeometry = new THREE.BoxGeometry(20, 10, 0.5);
+            const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+            backWall.position.set(0, 5, -10);
+            backWall.castShadow = true;
+            backWall.receiveShadow = true;
+            scene.add(backWall);
+            walls.push(backWall);
+            
+            // Pared izquierda
+            const leftWallGeometry = new THREE.BoxGeometry(0.5, 10, 20);
+            const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+            leftWall.position.set(-10, 5, 0);
+            leftWall.castShadow = true;
+            leftWall.receiveShadow = true;
+            scene.add(leftWall);
+            walls.push(leftWall);
+            
+            // Pared derecha
+            const rightWallGeometry = new THREE.BoxGeometry(0.5, 10, 20);
+            const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
+            rightWall.position.set(10, 5, 0);
+            rightWall.castShadow = true;
+            rightWall.receiveShadow = true;
+            scene.add(rightWall);
+            walls.push(rightWall);
+            
+            // Añadir detalles a las paredes (grietas, manchas, etc.)
+            addWallDetails();
+        }
+        
+        function addWallDetails() {
+            // Añadir texturas o detalles a las paredes para darles un aspecto de manicomio
+            // En este prototipo, simplemente añadimos algunas líneas para simular grietas
+            
+            const crackMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+            
+            // Grietas en la pared trasera
+            for (let i = 0; i < 5; i++) {
+                const points = [];
+                const startX = Math.random() * 10 - 5;
+                const startY = Math.random() * 5;
+                
+                points.push(new THREE.Vector3(startX, startY, -9.7));
+                
+                // Crear una grieta con varios segmentos
+                for (let j = 0; j < 5; j++) {
+                    const nextX = startX + (Math.random() - 0.5) * 2;
+                    const nextY = startY + (Math.random() - 0.5) * 2;
+                    points.push(new THREE.Vector3(nextX, nextY, -9.7));
+                }
+                
+                const crackGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                const crack = new THREE.Line(crackGeometry, crackMaterial);
+                scene.add(crack);
+            }
+        }
+        
+        function loadGameMechanics() {
+            // Cargar el script de mecánicas de juego
+            const script = document.createElement('script');
+            script.src = 'game-mechanics.js';
+            script.type = 'module';
+            script.onload = () => {
+                // Inicializar mecánicas de juego
+                if (typeof initGameMechanics === 'function') {
+                    gameManager = initGameMechanics(scene, camera);
+                    
+                    // Desactivar controles de órbita cuando se inicia el juego
+                    document.addEventListener('click', () => {
+                        if (gameManager.gameState === 'playing') {
+                            controls.enabled = false;
+                        }
+                    });
+                }
+            };
+            document.body.appendChild(script);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Calcular delta time
+            const deltaTime = Math.min(0.1, clock.getDelta());
+            
+            // Actualizar gestor de juego si está disponible
+            if (gameManager) {
+                gameManager.update(deltaTime);
+            }
+            
+            // Actualizar controles de órbita (solo si no estamos jugando)
+            if (!gameManager || gameManager.gameState !== 'playing') {
+                controls.update();
+            }
+            
+            // Renderizar escena
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

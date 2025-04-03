@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-config
+  namespace: la-hucha-de-paredes
+data:
+  api_url: "https://hucha-de-paredes.example.com/api"
+  redis_host: "redis-master"
+  redis_port: "6379"
+  max_players_per_room: "10"
+  game_duration_minutes: "15"
+  matchmaking_timeout_seconds: "60"
+  physics_update_rate: "60"
+  network_update_rate: "20"
+  enable_voice_chat: "true"
+  log_level: "info"

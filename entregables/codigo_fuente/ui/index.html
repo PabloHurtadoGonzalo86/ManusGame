@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Hucha de Paredes - Juego de Terror Multijugador</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Pantalla de carga -->
+    <div id="loading-screen">
+        <div id="loading-spinner"></div>
+        <div id="loading-text">Cargando...</div>
+        <div id="loading-progress">
+            <div id="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- Pantalla de inicio -->
+    <div id="start-screen">
+        <div class="content">
+            <h1 id="game-title">La Hucha de Paredes</h1>
+            <div id="start-buttons">
+                <button id="start-game-btn">Iniciar Juego</button>
+                <button id="options-btn" class="secondary">Opciones</button>
+                <button id="credits-btn" class="secondary">Créditos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú principal -->
+    <div id="main-menu">
+        <div class="container">
+            <div class="panel">
+                <h2>Menú Principal</h2>
+                <div id="main-menu-buttons">
+                    <button id="join-game-btn">Unirse a Partida</button>
+                    <button id="create-game-btn">Crear Partida</button>
+                    <button id="customize-btn">Personalizar Personaje</button>
+                    <button id="leaderboard-btn">Tabla de Puntuaciones</button>
+                    <button id="back-to-start-btn" class="secondary">Volver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de lobby -->
+    <div id="lobby-screen">
+        <div class="container">
+            <div id="lobby-container">
+                <div id="game-list">
+                    <h2>Partidas Disponibles</h2>
+                    <div id="game-items">
+                        <!-- Las partidas se generarán dinámicamente aquí -->
+                    </div>
+                </div>
+                <div id="lobby-details">
+                    <h2>Detalles de la Partida</h2>
+                    <div id="player-list">
+                        <!-- Los jugadores se generarán dinámicamente aquí -->
+                    </div>
+                    <div id="lobby-buttons">
+                        <button id="ready-btn" class="accent">Listo</button>
+                        <button id="leave-lobby-btn" class="secondary">Salir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de creación de partida -->
+    <div id="create-game-screen">
+        <div class="container">
+            <div class="panel">
+                <h2>Crear Nueva Partida</h2>
+                <form id="create-game-form">
+                    <div class="form-group">
+                        <label for="game-name">Nombre de la Partida</label>
+                        <input type="text" id="game-name" placeholder="Introduce un nombre para la partida" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="max-players">Número Máximo de Jugadores</label>
+                        <select id="max-players">
+                            <option value="2">2 Jugadores</option>
+                            <option value="3">3 Jugadores</option>
+                            <option value="4" selected>4 Jugadores</option>
+                            <option value="6">6 Jugadores</option>
+                            <option value="8">8 Jugadores</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="game-mode">Modo de Juego</label>
+                        <select id="game-mode">
+                            <option value="survival" selected>Supervivencia</option>
+                            <option value="team">Equipos</option>
+                            <option value="versus">Todos contra Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="game-privacy">Privacidad</label>
+                        <select id="game-privacy">
+                            <option value="public" selected>Pública</option>
+                            <option value="private">Privada</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="password-group" style="display: none;">
+                        <label for="game-password">Contraseña</label>
+                        <input type="password" id="game-password" placeholder="Introduce una contraseña">
+                    </div>
+                    <div id="create-game-buttons">
+                        <button type="submit" id="create-btn">Crear Partida</button>
+                        <button type="button" id="cancel-create-btn" class="secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de personalización -->
+    <div id="customization-screen">
+        <div class="container">
+            <div id="customization-container">
+                <div id="avatar-preview">
+                    <!-- Canvas para la vista previa del avatar -->
+                    <canvas id="avatar-canvas" width="400" height="400"></canvas>
+                </div>
+                <div id="customization-options">
+                    <h2>Personalizar Personaje</h2>
+                    
+                    <div class="option-group">
+                        <h3>Color de Piel</h3>
+                        <div class="color-options" id="skin-colors">
+                            <div class="color-option selected" style="background-color: #FFD8B4;" data-color="#FFD8B4"></div>
+                            <div class="color-option" style="background-color: #F1C27D;" data-color="#F1C27D"></div>
+                            <div class="color-option" style="background-color: #E0AC69;" data-color="#E0AC69"></div>
+                            <div class="color-option" style="background-color: #C68642;" data-color="#C68642"></div>
+                            <div class="color-option" style="background-color: #8D5524;" data-color="#8D5524"></div>
+                            <div class="color-option" style="background-color: #5C3836;" data-color="#5C3836"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <h3>Color de Pelo</h3>
+                        <div class="color-options" id="hair-colors">
+                            <div class="color-option selected" style="background-color: #090806;" data-color="#090806"></div>
+                            <div class="color-option" style="background-color: #71635A;" data-color="#71635A"></div>
+                            <div class="color-option" style="background-color: #B7A69E;" data-color="#B7A69E"></div>
+                            <div class="color-option" style="background-color: #D6C4C2;" data-color="#D6C4C2"></div>
+                            <div class="color-option" style="background-color: #F4D7A7;" data-color="#F4D7A7"></div>
+                            <div class="color-option" style="background-color: #A8503C;" data-color="#A8503C"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <h3>Estilo de Pelo</h3>
+                        <div class="slider-container">
+                            <label for="hair-style">Estilo</label>
+                            <input type="range" id="hair-style" min="0" max="5" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <h3>Color de Ojos</h3>
+                        <div class="color-options" id="eye-colors">
+                            <div class="color-option selected" style="background-color: #634E34;" data-color="#634E34"></div>
+                            <div class="color-option" style="background-color: #2C5784;" data-color="#2C5784"></div>
+                            <div class="color-option" style="background-color: #366A6A;" data-color="#366A6A"></div>
+                            <div class="color-option" style="background-color: #704241;" data-color="#704241"></div>
+                            <div class="color-option" style="background-color: #1F1F1F;" data-color="#1F1F1F"></div>
+                            <div class="color-option" style="background-color: #497665;" data-color="#497665"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <h3>Ropa</h3>
+                        <div class="slider-container">
+                            <label for="outfit-style">Estilo</label>
+                            <input type="range" id="outfit-style" min="0" max="5" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="option-group">
+                        <h3>Color de Ropa</h3>
+                        <div class="color-options" id="outfit-colors">
+                            <div class="color-option selected" style="background-color: #1F1F1F;" data-color="#1F1F1F"></div>
+                            <div class="color-option" style="background-color: #7D4D4D;" data-color="#7D4D4D"></div>
+                            <div class="color-option" style="background-color: #4D7D4D;" data-color="#4D4D7D"></div>
+                            <div class="color-option" style="background-color: #4D4D7D;" data-color="#4D4D7D"></div>
+                            <div class="color-option" style="background-color: #7D4D7D;" data-color="#7D4D7D"></div>
+                            <div class="color-option" style="background-color: #7D7D4D;" data-color="#7D7D4D"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="customization-buttons">
+                        <button id="save-customization-btn">Guardar</button>
+                        <button id="cancel-customization-btn" class="secondary">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de puntuaciones -->
+    <div id="leaderboard-screen">
+        <div class="container">
+            <div id="leaderboard-container">
+                <h2>Mejores Puntuaciones</h2>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="rank">Pos.</th>
+                            <th class="player">Jugador</th>
+                            <th class="score">Puntos</th>
+                            <th class="time">Tiempo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-entries">
+                        <!-- Las entradas se generarán dinámicamente aquí -->
+                    </tbody>
+                </table>
+                <div id="leaderboard-buttons">
+                    <button id="back-from-leaderboard-btn">Volver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interfaz durante el juego -->
+    <div id="game-ui">
+        <div id="health-container">
+            <div id="health-bar"></div>
+        </div>
+        <div id="stamina-container">
+            <div id="stamina-bar"></div>
+        </div>
+        <div id="score-display">Puntos: <span id="score-value">0</span></div>
+        <div id="timer-display"><span id="timer-value">00:00</span></div>
+        <div id="crosshair"></div>
+        <div id="interaction-prompt">Presiona E para interactuar</div>
+        
+        <div id="chat-container">
+            <div id="chat-messages">
+                <!-- Los mensajes se generarán dinámicamente aquí -->
+            </div>
+            <div id="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Escribe un mensaje...">
+                <button id="chat-send">Enviar</button>
+            </div>
+        </div>
+        
+        <div id="damage-overlay"></div>
+    </div>
+
+    <!-- Pantalla de Game Over -->
+    <div id="game-over-screen">
+        <div class="container">
+            <div id="game-over-container">
+                <h1 id="game-over-title">Game Over</h1>
+                <div id="final-score">Puntuación: <span id="final-score-value">0</span></div>
+                <div id="game-over-buttons">
+                    <button id="play-again-btn">Jugar de Nuevo</button>
+                    <button id="back-to-menu-btn" class="secondary">Menú Principal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/ui-manager.js"></script>
+    <script src="js/customization.js"></script>
+    <script src="js/lobby-system.js"></script>
+    <script src="js/game-interface.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
